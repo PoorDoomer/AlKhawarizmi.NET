@@ -161,7 +161,12 @@ Want to contribute? Great! Check out our [Developer Guide](docs/DeveloperGuide.m
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+## TO DO
 
+    Auto Documentation using LLMs
+    Auto CRUD creation of an entity
+    AI endpoint creation
+    
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
