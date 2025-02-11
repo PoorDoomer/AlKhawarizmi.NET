@@ -1,0 +1,21 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using {ProjectName}.Infrastructure.Caching.Services;
+
+namespace {ProjectName}.Infrastructure.Caching;
+
+public static class CachingExtensions
+{
+    public static IServiceCollection AddCustomCaching(this IServiceCollection services, string redisConnectionString)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnectionString;
+            options.InstanceName = "{ProjectName}:";
+        });
+
+        services.AddScoped<ICacheService, RedisCacheService>();
+
+        return services;
+    }
+} 

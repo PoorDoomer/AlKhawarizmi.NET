@@ -1,0 +1,45 @@
+namespace {ProjectName}.Infrastructure.ErrorHandling.Exceptions;
+
+public class ApplicationException : Exception
+{
+    public ApplicationException(string message) : base(message)
+    {
+    }
+
+    public ApplicationException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+}
+
+public class NotFoundException : ApplicationException
+{
+    public NotFoundException(string name, object key)
+        : base($"Entity \"{name}\" ({key}) was not found.")
+    {
+    }
+}
+
+public class ValidationException : ApplicationException
+{
+    public IDictionary<string, string[]> Errors { get; }
+
+    public ValidationException(IDictionary<string, string[]> errors)
+        : base("One or more validation failures have occurred.")
+    {
+        Errors = errors;
+    }
+}
+
+public class ForbiddenAccessException : ApplicationException
+{
+    public ForbiddenAccessException() : base("You do not have permission to access this resource.")
+    {
+    }
+}
+
+public class ConflictException : ApplicationException
+{
+    public ConflictException(string message) : base(message)
+    {
+    }
+} 

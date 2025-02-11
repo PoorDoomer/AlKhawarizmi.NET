@@ -1,0 +1,20 @@
+using System.Collections.Concurrent;
+
+namespace {ProjectName}.Domain.Common;
+
+public abstract class AggregateRoot : Entity
+{
+    private readonly ConcurrentQueue<DomainEvent> _domainEvents = new();
+
+    public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.ToArray();
+
+    protected void AddDomainEvent(DomainEvent domainEvent)
+    {
+        _domainEvents.Enqueue(domainEvent);
+    }
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+} 

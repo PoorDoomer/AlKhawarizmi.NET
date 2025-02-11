@@ -1,0 +1,49 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentValidation;
+using MediatR;
+
+namespace {Namespace}.Commands
+{
+    public class Delete{EntityName}Command : IRequest<bool>
+    {
+        public Guid Id { get; set; }
+    }
+
+    public class Delete{EntityName}CommandValidator : AbstractValidator<Delete{EntityName}Command>
+    {
+        public Delete{EntityName}CommandValidator()
+        {
+            RuleFor(x => x.Id).NotEmpty();
+        }
+    }
+
+    public class Delete{EntityName}CommandHandler : IRequestHandler<Delete{EntityName}Command, bool>
+    {
+        private readonly IRepository<{EntityName}> _repository;
+        private readonly IValidator<Delete{EntityName}Command> _validator;
+
+        public Delete{EntityName}CommandHandler(
+            IRepository<{EntityName}> repository,
+            IValidator<Delete{EntityName}Command> validator)
+        {
+            _repository = repository;
+            _validator = validator;
+        }
+
+        public async Task<bool> Handle(Delete{EntityName}Command request, CancellationToken cancellationToken)
+        {
+            await _validator.ValidateAndThrowAsync(request, cancellationToken);
+
+            var entity = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            if (entity == null)
+                throw new NotFoundException($"{EntityName} with ID {request.Id} not found.");
+
+{SoftDelete}
+            await _repository.SaveChangesAsync(cancellationToken);
+
+            return true;
+        }
+    }
+} 

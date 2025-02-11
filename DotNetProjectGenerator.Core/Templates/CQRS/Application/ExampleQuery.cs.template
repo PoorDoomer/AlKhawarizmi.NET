@@ -1,0 +1,17 @@
+using {ProjectName}.Application.Common.Queries;
+
+namespace {ProjectName}.Application.Features.Example;
+
+public record ExampleQuery(string Id) : IQuery<ExampleDto>;
+
+public record ExampleDto(string Id, string Data);
+
+public class ExampleQueryHandler : IQueryHandler<ExampleQuery, ExampleDto>
+{
+    public async Task<ExampleDto> Handle(ExampleQuery request, CancellationToken cancellationToken)
+    {
+        // Example query implementation
+        await Task.Delay(100, cancellationToken);
+        return new ExampleDto(request.Id, "Example Data");
+    }
+} 

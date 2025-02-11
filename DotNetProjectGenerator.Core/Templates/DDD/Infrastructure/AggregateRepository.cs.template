@@ -1,0 +1,48 @@
+using {ProjectName}.Domain.Common;
+using {ProjectName}.Infrastructure.EventDispatcher;
+using Microsoft.EntityFrameworkCore;
+
+namespace {ProjectName}.Infrastructure.Persistence;
+
+public class AggregateRepository<T> : IAggregateRepository<T> where T : AggregateRoot
+{
+    private readonly DbContext _context;
+    private readonly DbSet<T> _dbSet;
+    private readonly DomainEventDispatcher _eventDispatcher;
+
+    public AggregateRepository(DbContext context, DomainEventDispatcher eventDispatcher)
+    {
+        _context = context;
+        _dbSet = context.Set<T>();
+        _eventDispatcher = eventDispatcher;
+    }
+
+    public async Task<T?> GetByIdAsync(Guid id)
+    {
+        return await _dbSet.FindAsync(id);
+    }
+
+    public async Task<IEnumerable<T>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
+
+    public async Task SaveAsync(T aggregate)
+    {
+        var entry = _context.Entry(aggregate);
+        if (entry.State == EntityState.Detached)
+        {
+            await _dbSet.AddAsync(aggregate);
+        }
+
+        await _context.SaveChangesAsync();
+        await _eventDispatcher.DispatchEventsAsync(aggregate);
+    }
+
+    public async Task DeleteAsync(T aggregate)
+    {
+        _dbSet.Remove(aggregate);
+        await _context.SaveChangesAsync();
+        await _eventDispatcher.DispatchEventsAsync(aggregate);
+    }
+} 

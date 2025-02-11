@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {ProjectName}-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {ProjectName}-api
+  template:
+    metadata:
+      labels:
+        app: {ProjectName}-api
+    spec:
+      containers:
+      - name: api
+        image: {ProjectName}-api:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {ProjectName}-api-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: {ProjectName}-api 

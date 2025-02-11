@@ -1,0 +1,55 @@
+using {ProjectName}.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace {ProjectName}.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public abstract class BaseController<TDto> : ControllerBase
+{
+    protected readonly IService<TDto> _service;
+
+    protected BaseController(IService<TDto> service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    public virtual async Task<ActionResult<IEnumerable<TDto>>> GetAll()
+    {
+        var items = await _service.GetAllAsync();
+        return Ok(items);
+    }
+
+    [HttpGet("{id}")]
+    public virtual async Task<ActionResult<TDto>> Get(Guid id)
+    {
+        var item = await _service.GetByIdAsync(id);
+        if (item == null)
+        {
+            return NotFound();
+        }
+        return Ok(item);
+    }
+
+    [HttpPost]
+    public virtual async Task<ActionResult<TDto>> Create([FromBody] TDto dto)
+    {
+        var created = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(Get), new { id = created }, created);
+    }
+
+    [HttpPut("{id}")]
+    public virtual async Task<IActionResult> Update(Guid id, [FromBody] TDto dto)
+    {
+        await _service.UpdateAsync(dto);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public virtual async Task<IActionResult> Delete(Guid id)
+    {
+        await _service.DeleteAsync(id);
+        return NoContent();
+    }
+} 

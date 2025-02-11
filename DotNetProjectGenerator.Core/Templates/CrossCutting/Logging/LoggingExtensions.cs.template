@@ -1,0 +1,40 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Elasticsearch;
+
+namespace {ProjectName}.Infrastructure.Logging;
+
+public static class LoggingExtensions
+{
+    public static IServiceCollection AddCustomLogging(this IServiceCollection services, string applicationName)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithEnvironmentName()
+            .Enrich.WithProperty("ApplicationName", applicationName)
+            .WriteTo.Console()
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+            {
+                AutoRegisterTemplate = true,
+                IndexFormat = $"{applicationName.ToLower()}-{{0:yyyy.MM.dd}}",
+                NumberOfReplicas = 1,
+                NumberOfShards = 2
+            })
+            .CreateLogger();
+
+        services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.ClearProviders();
+            loggingBuilder.AddSerilog(dispose: true);
+        });
+
+        return services;
+    }
+} 

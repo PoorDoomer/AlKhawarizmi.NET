@@ -1,0 +1,67 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+
+namespace {ProjectName}.Infrastructure.Authentication.Services;
+
+public class JwtService
+{
+    private readonly string _jwtSecret;
+    private readonly int _jwtLifetimeMinutes;
+
+    public JwtService(string jwtSecret, int jwtLifetimeMinutes = 60)
+    {
+        _jwtSecret = jwtSecret;
+        _jwtLifetimeMinutes = jwtLifetimeMinutes;
+    }
+
+    public string GenerateToken(string userId, string[] roles)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_jwtSecret);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId)
+        };
+
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddMinutes(_jwtLifetimeMinutes),
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+
+    public bool ValidateToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_jwtSecret);
+
+        try
+        {
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            }, out _);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+} 

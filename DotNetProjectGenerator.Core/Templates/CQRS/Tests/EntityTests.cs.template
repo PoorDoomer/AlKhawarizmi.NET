@@ -1,0 +1,189 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using FluentAssertions;
+using MediatR;
+using Moq;
+using Xunit;
+using {Namespace}.Commands;
+using {Namespace}.Queries;
+using {Namespace}.Models;
+
+namespace {Namespace}.Tests
+{
+    public class {EntityName}Tests
+    {
+        private readonly Mock<IRepository<{EntityName}>> _repositoryMock;
+        private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IValidator<Create{EntityName}Command>> _createValidatorMock;
+        private readonly Mock<IValidator<Update{EntityName}Command>> _updateValidatorMock;
+        private readonly Mock<IValidator<Delete{EntityName}Command>> _deleteValidatorMock;
+
+        public {EntityName}Tests()
+        {
+            _repositoryMock = new Mock<IRepository<{EntityName}>>();
+            _mapperMock = new Mock<IMapper>();
+            _createValidatorMock = new Mock<IValidator<Create{EntityName}Command>>();
+            _updateValidatorMock = new Mock<IValidator<Update{EntityName}Command>>();
+            _deleteValidatorMock = new Mock<IValidator<Delete{EntityName}Command>>();
+        }
+
+        [Fact]
+        public async Task Create_ValidCommand_ShouldSucceed()
+        {
+            // Arrange
+            var command = new Create{EntityName}Command
+            {
+{CreateCommandProperties}
+            };
+
+            var entity = new {EntityName}
+            {
+                Id = Guid.NewGuid(),
+{EntityProperties}
+            };
+
+            _mapperMock.Setup(m => m.Map<{EntityName}>(command))
+                .Returns(entity);
+
+            var handler = new Create{EntityName}CommandHandler(_repositoryMock.Object, _createValidatorMock.Object);
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Should().NotBeEmpty();
+            _repositoryMock.Verify(r => r.AddAsync(It.IsAny<{EntityName}>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Update_ValidCommand_ShouldSucceed()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var command = new Update{EntityName}Command
+            {
+                Id = id,
+{UpdateCommandProperties}
+            };
+
+            var existingEntity = new {EntityName}
+            {
+                Id = id,
+{EntityProperties}
+            };
+
+            _repositoryMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingEntity);
+
+            var handler = new Update{EntityName}CommandHandler(_repositoryMock.Object, _updateValidatorMock.Object);
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Should().BeTrue();
+            _repositoryMock.Verify(r => r.Update(It.IsAny<{EntityName}>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Delete_ValidCommand_ShouldSucceed()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var command = new Delete{EntityName}Command { Id = id };
+
+            var existingEntity = new {EntityName} { Id = id };
+
+            _repositoryMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingEntity);
+
+            var handler = new Delete{EntityName}CommandHandler(_repositoryMock.Object, _deleteValidatorMock.Object);
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Should().BeTrue();
+{DeleteVerification}
+        }
+
+        [Fact]
+        public async Task Get_ExistingId_ShouldReturnDto()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var query = new Get{EntityName}Query { Id = id };
+
+            var entity = new {EntityName}
+            {
+                Id = id,
+{EntityProperties}
+            };
+
+            var dto = new {EntityName}Dto
+            {
+                Id = id,
+{DtoProperties}
+            };
+
+            _repositoryMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(entity);
+
+            _mapperMock.Setup(m => m.Map<{EntityName}Dto>(entity))
+                .Returns(dto);
+
+            var handler = new Get{EntityName}QueryHandler(_repositoryMock.Object, _mapperMock.Object);
+
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Id.Should().Be(id);
+{DtoAssertions}
+        }
+
+        [Fact]
+        public async Task GetAll_ShouldReturnPagedResult()
+        {
+            // Arrange
+            var query = new GetAll{EntityName}sQuery
+            {
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var entities = new List<{EntityName}>
+            {
+                new() { Id = Guid.NewGuid(), {EntityPropertiesInitialization} },
+                new() { Id = Guid.NewGuid(), {EntityPropertiesInitialization} }
+            };
+
+            var dtos = entities.Select(e => new {EntityName}Dto
+            {
+                Id = e.Id,
+{DtoPropertiesMapping}
+            }).ToList();
+
+            _repositoryMock.Setup(r => r.GetQueryable())
+                .Returns(entities.AsQueryable());
+
+            _mapperMock.Setup(m => m.Map<List<{EntityName}Dto>>(It.IsAny<List<{EntityName}>>()))
+                .Returns(dtos);
+
+            var handler = new GetAll{EntityName}sQueryHandler(_repositoryMock.Object, _mapperMock.Object);
+
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Items.Should().HaveCount(2);
+            result.TotalItems.Should().Be(2);
+            result.PageNumber.Should().Be(1);
+            result.PageSize.Should().Be(10);
+        }
+    }
+} 

@@ -1,0 +1,53 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentValidation;
+using MediatR;
+
+namespace {Namespace}.Commands
+{
+    public class Update{EntityName}Command : IRequest<bool>
+    {
+        public Guid Id { get; set; }
+{Properties}
+    }
+
+    public class Update{EntityName}CommandValidator : AbstractValidator<Update{EntityName}Command>
+    {
+        public Update{EntityName}CommandValidator()
+        {
+            RuleFor(x => x.Id).NotEmpty();
+{Validations}
+        }
+    }
+
+    public class Update{EntityName}CommandHandler : IRequestHandler<Update{EntityName}Command, bool>
+    {
+        private readonly IRepository<{EntityName}> _repository;
+        private readonly IValidator<Update{EntityName}Command> _validator;
+
+        public Update{EntityName}CommandHandler(
+            IRepository<{EntityName}> repository,
+            IValidator<Update{EntityName}Command> validator)
+        {
+            _repository = repository;
+            _validator = validator;
+        }
+
+        public async Task<bool> Handle(Update{EntityName}Command request, CancellationToken cancellationToken)
+        {
+            await _validator.ValidateAndThrowAsync(request, cancellationToken);
+
+            var entity = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            if (entity == null)
+                throw new NotFoundException($"{EntityName} with ID {request.Id} not found.");
+
+{Mappings}
+
+            _repository.Update(entity);
+            await _repository.SaveChangesAsync(cancellationToken);
+
+            return true;
+        }
+    }
+} 

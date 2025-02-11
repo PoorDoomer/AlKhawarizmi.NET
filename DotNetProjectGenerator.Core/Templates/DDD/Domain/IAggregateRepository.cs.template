@@ -1,0 +1,9 @@
+namespace {ProjectName}.Domain.Common;
+
+public interface IAggregateRepository<T> where T : AggregateRoot
+{
+    Task<T?> GetByIdAsync(Guid id);
+    Task<IEnumerable<T>> GetAllAsync();
+    Task SaveAsync(T aggregate);
+    Task DeleteAsync(T aggregate);
+} 

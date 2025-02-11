@@ -1,0 +1,41 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using MediatR;
+
+namespace {Namespace}.Queries
+{
+    public class Get{EntityName}Query : IRequest<{EntityName}Dto>
+    {
+        public Guid Id { get; set; }
+    }
+
+    public class Get{EntityName}QueryHandler : IRequestHandler<Get{EntityName}Query, {EntityName}Dto>
+    {
+        private readonly IRepository<{EntityName}> _repository;
+        private readonly IMapper _mapper;
+{CacheService}
+
+        public Get{EntityName}QueryHandler(
+            IRepository<{EntityName}> repository,
+            IMapper mapper{CacheServiceParam})
+        {
+            _repository = repository;
+            _mapper = mapper;
+{CacheServiceAssignment}
+        }
+
+        public async Task<{EntityName}Dto> Handle(Get{EntityName}Query request, CancellationToken cancellationToken)
+        {
+{CacheCheck}
+            var entity = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            if (entity == null)
+                throw new NotFoundException($"{EntityName} with ID {request.Id} not found.");
+
+            var dto = _mapper.Map<{EntityName}Dto>(entity);
+{CacheSet}
+            return dto;
+        }
+    }
+} 

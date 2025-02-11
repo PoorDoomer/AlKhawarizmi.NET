@@ -1,0 +1,181 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using {Namespace}.Interfaces;
+using {Namespace}.Models;
+
+namespace {Namespace}.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+{Authorization}
+    public class {EntityName}Controller : ControllerBase
+    {
+        private readonly I{EntityName}Service _service;
+        private readonly ILogger<{EntityName}Controller> _logger;
+
+        public {EntityName}Controller(
+            I{EntityName}Service service,
+            ILogger<{EntityName}Controller> logger)
+        {
+            _service = service;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Creates a new {EntityName}.
+        /// </summary>
+        /// <param name="dto">The {EntityName} data.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The ID of the created {EntityName}.</returns>
+{SwaggerCreate}
+        [HttpPost]
+{ResponseCache}
+        public async Task<ActionResult<Guid>> Create(
+            [FromBody] {EntityName}Dto dto,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _service.CreateAsync(dto, cancellationToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating {EntityName}", nameof({EntityName}));
+                return StatusCode(500, "An error occurred while creating the {EntityName}.");
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing {EntityName}.
+        /// </summary>
+        /// <param name="id">The {EntityName} ID.</param>
+        /// <param name="dto">The updated {EntityName} data.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Success indicator.</returns>
+{SwaggerUpdate}
+        [HttpPut("{id}")]
+{ResponseCache}
+        public async Task<ActionResult<bool>> Update(
+            [FromRoute] Guid id,
+            [FromBody] {EntityName}Dto dto,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _service.UpdateAsync(id, dto, cancellationToken);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating {EntityName} with ID {Id}", nameof({EntityName}), id);
+                return StatusCode(500, $"An error occurred while updating the {EntityName}.");
+            }
+        }
+
+        /// <summary>
+        /// Deletes a {EntityName}.
+        /// </summary>
+        /// <param name="id">The {EntityName} ID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Success indicator.</returns>
+{SwaggerDelete}
+        [HttpDelete("{id}")]
+{ResponseCache}
+        public async Task<ActionResult<bool>> Delete(
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _service.DeleteAsync(id, cancellationToken);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting {EntityName} with ID {Id}", nameof({EntityName}), id);
+                return StatusCode(500, $"An error occurred while deleting the {EntityName}.");
+            }
+        }
+
+        /// <summary>
+        /// Gets a {EntityName} by ID.
+        /// </summary>
+        /// <param name="id">The {EntityName} ID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The {EntityName} details.</returns>
+{SwaggerGet}
+        [HttpGet("{id}")]
+{ResponseCache}
+        public async Task<ActionResult<{EntityName}Dto>> Get(
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _service.GetByIdAsync(id, cancellationToken);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving {EntityName} with ID {Id}", nameof({EntityName}), id);
+                return StatusCode(500, $"An error occurred while retrieving the {EntityName}.");
+            }
+        }
+
+        /// <summary>
+        /// Gets a paged list of {EntityName}s.
+        /// </summary>
+        /// <param name="pageNumber">Page number (default: 1).</param>
+        /// <param name="pageSize">Page size (default: 10).</param>
+        /// <param name="searchTerm">Search term.</param>
+        /// <param name="sortBy">Sort by field name.</param>
+        /// <param name="sortDescending">Sort direction.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A paged list of {EntityName}s.</returns>
+{SwaggerGetAll}
+        [HttpGet]
+{ResponseCache}
+        public async Task<ActionResult<PagedResult<{EntityName}Dto>>> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string searchTerm = null,
+            [FromQuery] string sortBy = null,
+            [FromQuery] bool sortDescending = false,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _service.GetAllAsync(
+                    pageNumber,
+                    pageSize,
+                    searchTerm,
+                    sortBy,
+                    sortDescending,
+                    cancellationToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving {EntityName} list", nameof({EntityName}));
+                return StatusCode(500, $"An error occurred while retrieving the {EntityName} list.");
+            }
+        }
+{AdditionalEndpoints}
+    }
+} 

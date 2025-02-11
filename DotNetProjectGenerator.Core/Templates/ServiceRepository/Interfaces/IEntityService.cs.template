@@ -1,0 +1,24 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using {Namespace}.Models;
+
+namespace {Namespace}.Interfaces
+{
+    public interface I{EntityName}Service
+    {
+        Task<{EntityName}Dto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<PagedResult<{EntityName}Dto>> GetAllAsync(
+            int pageNumber = 1, 
+            int pageSize = 10, 
+            string searchTerm = null, 
+            string sortBy = null, 
+            bool sortDescending = false, 
+            CancellationToken cancellationToken = default);
+        Task<Guid> CreateAsync({EntityName}Dto dto, CancellationToken cancellationToken = default);
+        Task<bool> UpdateAsync(Guid id, {EntityName}Dto dto, CancellationToken cancellationToken = default);
+        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+{AdditionalMethods}
+    }
+} 

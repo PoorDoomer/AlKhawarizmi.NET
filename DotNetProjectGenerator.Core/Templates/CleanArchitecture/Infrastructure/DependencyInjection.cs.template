@@ -1,0 +1,14 @@
+using {ProjectName}.Domain.Interfaces;
+using {ProjectName}.Infrastructure.Persistence;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace {ProjectName}.Infrastructure;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        return services;
+    }
+} 

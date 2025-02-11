@@ -1,0 +1,16 @@
+using AutoMapper;
+using {Namespace}.Models;
+
+namespace {Namespace}.Mappings
+{
+    public class {EntityName}MappingProfile : Profile
+    {
+        public {EntityName}MappingProfile()
+        {
+            CreateMap<{EntityName}, {EntityName}Dto>();
+            CreateMap<Create{EntityName}Command, {EntityName}>();
+            CreateMap<Update{EntityName}Command, {EntityName}>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+        }
+    }
+} 

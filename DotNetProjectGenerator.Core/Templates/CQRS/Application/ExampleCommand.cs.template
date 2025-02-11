@@ -1,0 +1,15 @@
+using {ProjectName}.Application.Common.Commands;
+
+namespace {ProjectName}.Application.Features.Example;
+
+public record ExampleCommand(string Data) : ICommand<bool>;
+
+public class ExampleCommandHandler : ICommandHandler<ExampleCommand, bool>
+{
+    public async Task<bool> Handle(ExampleCommand request, CancellationToken cancellationToken)
+    {
+        // Example command implementation
+        await Task.Delay(100, cancellationToken);
+        return true;
+    }
+} 

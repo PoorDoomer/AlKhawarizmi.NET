@@ -1,0 +1,74 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using {Namespace}.Interfaces;
+using {Namespace}.Models;
+
+namespace {Namespace}.Repositories
+{
+    public class {EntityName}Repository : I{EntityName}Repository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public {EntityName}Repository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<{EntityName}> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _context.{EntityName}s
+{IncludeStatements}
+                .FirstOrDefaultAsync(x => x.Id == id{SoftDeleteCondition}, cancellationToken);
+        }
+
+        public IQueryable<{EntityName}> GetQueryable()
+        {
+            return _context.{EntityName}s
+{IncludeStatements}
+                .Where(x => {SoftDeleteCondition});
+        }
+
+        public async Task<List<{EntityName}>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.{EntityName}s
+{IncludeStatements}
+                .Where(x => {SoftDeleteCondition})
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<{EntityName}> AddAsync({EntityName} entity, CancellationToken cancellationToken = default)
+        {
+{AuditOnCreate}
+            await _context.{EntityName}s.AddAsync(entity, cancellationToken);
+            return entity;
+        }
+
+        public async Task UpdateAsync({EntityName} entity, CancellationToken cancellationToken = default)
+        {
+{AuditOnUpdate}
+            _context.{EntityName}s.Update(entity);
+        }
+
+        public async Task DeleteAsync({EntityName} entity, CancellationToken cancellationToken = default)
+        {
+{SoftDeleteImplementation}
+{HardDeleteImplementation}
+        }
+
+        public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _context.{EntityName}s
+                .AnyAsync(x => x.Id == id{SoftDeleteCondition}, cancellationToken);
+        }
+
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.SaveChangesAsync(cancellationToken);
+        }
+{AdditionalMethods}
+    }
+} 

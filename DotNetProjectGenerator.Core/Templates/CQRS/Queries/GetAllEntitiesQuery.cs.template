@@ -1,0 +1,76 @@
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using MediatR;
+
+namespace {Namespace}.Queries
+{
+    public class GetAll{EntityName}sQuery : IRequest<PagedResult<{EntityName}Dto>>
+    {
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string? SearchTerm { get; set; }
+        public string? SortBy { get; set; }
+        public bool SortDescending { get; set; }
+    }
+
+    public class GetAll{EntityName}sQueryHandler : IRequestHandler<GetAll{EntityName}sQuery, PagedResult<{EntityName}Dto>>
+    {
+        private readonly IRepository<{EntityName}> _repository;
+        private readonly IMapper _mapper;
+{CacheService}
+
+        public GetAll{EntityName}sQueryHandler(
+            IRepository<{EntityName}> repository,
+            IMapper mapper{CacheServiceParam})
+        {
+            _repository = repository;
+            _mapper = mapper;
+{CacheServiceAssignment}
+        }
+
+        public async Task<PagedResult<{EntityName}Dto>> Handle(GetAll{EntityName}sQuery request, CancellationToken cancellationToken)
+        {
+{CacheCheck}
+            var query = _repository.GetQueryable();
+
+            // Apply search if provided
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                query = query.Where(x => {SearchConditions});
+            }
+
+            // Apply sorting
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+            {
+                query = request.SortDescending
+                    ? query.OrderByDescending(x => EF.Property<object>(x, request.SortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, request.SortBy));
+            }
+
+            // Get total count
+            var totalItems = await query.CountAsync(cancellationToken);
+
+            // Apply pagination
+            var items = await query
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync(cancellationToken);
+
+            var dtos = _mapper.Map<List<{EntityName}Dto>>(items);
+
+            var result = new PagedResult<{EntityName}Dto>
+            {
+                Items = dtos,
+                TotalItems = totalItems,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)request.PageSize)
+            };
+
+{CacheSet}
+            return result;
+        }
+    }
+} 

@@ -1,0 +1,33 @@
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+stages:
+  - build
+  - test
+  - publish
+
+variables:
+  CONFIGURATION: Release
+
+build:
+  stage: build
+  script:
+    - dotnet restore
+    - dotnet build --configuration $CONFIGURATION
+  artifacts:
+    paths:
+      - "**/bin/$CONFIGURATION/"
+
+test:
+  stage: test
+  script:
+    - dotnet test --configuration $CONFIGURATION --no-build
+
+publish:
+  stage: publish
+  script:
+    - dotnet publish --configuration $CONFIGURATION --output ./publish
+  artifacts:
+    paths:
+      - publish/
+  only:
+    - main 

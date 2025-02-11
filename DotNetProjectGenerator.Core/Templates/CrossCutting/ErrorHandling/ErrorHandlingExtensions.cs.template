@@ -1,0 +1,20 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using {ProjectName}.Infrastructure.ErrorHandling.Middleware;
+
+namespace {ProjectName}.Infrastructure.ErrorHandling;
+
+public static class ErrorHandlingExtensions
+{
+    public static IServiceCollection AddCustomErrorHandling(this IServiceCollection services)
+    {
+        services.AddScoped<ExceptionHandlingMiddleware>();
+        return services;
+    }
+
+    public static IApplicationBuilder UseCustomErrorHandling(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+        return app;
+    }
+} 

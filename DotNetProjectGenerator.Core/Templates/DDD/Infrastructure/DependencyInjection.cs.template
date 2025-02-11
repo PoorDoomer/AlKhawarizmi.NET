@@ -1,0 +1,17 @@
+using {ProjectName}.Domain.Common;
+using {ProjectName}.Infrastructure.EventDispatcher;
+using {ProjectName}.Infrastructure.Persistence;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace {ProjectName}.Infrastructure;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IAggregateRepository<>), typeof(AggregateRepository<>));
+        services.AddScoped<DomainEventDispatcher>();
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+        return services;
+    }
+} 

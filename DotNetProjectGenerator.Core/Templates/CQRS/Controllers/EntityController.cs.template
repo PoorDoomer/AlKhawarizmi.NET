@@ -1,0 +1,97 @@
+using System;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using {Namespace}.Commands;
+using {Namespace}.Queries;
+using {Namespace}.Models;
+
+namespace {Namespace}.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+{Authorization}
+    public class {EntityName}Controller : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public {EntityName}Controller(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Creates a new {EntityName}.
+        /// </summary>
+        /// <param name="command">The create command.</param>
+        /// <returns>The ID of the created {EntityName}.</returns>
+{SwaggerCreate}
+        [HttpPost]
+{ResponseCache}
+        public async Task<ActionResult<Guid>> Create(Create{EntityName}Command command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Updates an existing {EntityName}.
+        /// </summary>
+        /// <param name="id">The {EntityName} ID.</param>
+        /// <param name="command">The update command.</param>
+        /// <returns>Success indicator.</returns>
+{SwaggerUpdate}
+        [HttpPut("{id}")]
+{ResponseCache}
+        public async Task<ActionResult<bool>> Update(Guid id, Update{EntityName}Command command)
+        {
+            if (id != command.Id)
+                return BadRequest();
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Deletes a {EntityName}.
+        /// </summary>
+        /// <param name="id">The {EntityName} ID.</param>
+        /// <returns>Success indicator.</returns>
+{SwaggerDelete}
+        [HttpDelete("{id}")]
+{ResponseCache}
+        public async Task<ActionResult<bool>> Delete(Guid id)
+        {
+            var result = await _mediator.Send(new Delete{EntityName}Command { Id = id });
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets a {EntityName} by ID.
+        /// </summary>
+        /// <param name="id">The {EntityName} ID.</param>
+        /// <returns>The {EntityName} details.</returns>
+{SwaggerGet}
+        [HttpGet("{id}")]
+{ResponseCache}
+        public async Task<ActionResult<{EntityName}Dto>> Get(Guid id)
+        {
+            var result = await _mediator.Send(new Get{EntityName}Query { Id = id });
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets a paged list of {EntityName}s.
+        /// </summary>
+        /// <param name="query">The query parameters.</param>
+        /// <returns>A paged list of {EntityName}s.</returns>
+{SwaggerGetAll}
+        [HttpGet]
+{ResponseCache}
+        public async Task<ActionResult<PagedResult<{EntityName}Dto>>> GetAll([FromQuery] GetAll{EntityName}sQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+    }
+} 

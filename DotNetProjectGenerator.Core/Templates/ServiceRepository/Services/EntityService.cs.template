@@ -1,0 +1,183 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using {Namespace}.Interfaces;
+using {Namespace}.Models;
+
+namespace {Namespace}.Services
+{
+    public class {EntityName}Service : I{EntityName}Service
+    {
+        private readonly I{EntityName}Repository _repository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<{EntityName}Service> _logger;
+{CacheService}
+
+        public {EntityName}Service(
+            I{EntityName}Repository repository,
+            IMapper mapper,
+            ILogger<{EntityName}Service> logger{CacheServiceParam})
+        {
+            _repository = repository;
+            _mapper = mapper;
+            _logger = logger;
+{CacheServiceAssignment}
+        }
+
+        public async Task<{EntityName}Dto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+{CacheCheck}
+                var entity = await _repository.GetByIdAsync(id, cancellationToken);
+                if (entity == null)
+                {
+                    _logger.LogWarning("{EntityName} with ID {Id} not found", nameof({EntityName}), id);
+                    throw new NotFoundException($"{EntityName} with ID {id} not found.");
+                }
+
+                var dto = _mapper.Map<{EntityName}Dto>(entity);
+{CacheSet}
+                return dto;
+            }
+            catch (Exception ex) when (ex is not NotFoundException)
+            {
+                _logger.LogError(ex, "Error retrieving {EntityName} with ID {Id}", nameof({EntityName}), id);
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<{EntityName}Dto>> GetAllAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string searchTerm = null,
+            string sortBy = null,
+            bool sortDescending = false,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+{CacheCheck}
+                var query = _repository.GetQueryable();
+
+                // Apply search if provided
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    query = query.Where(x => {SearchConditions});
+                }
+
+                // Apply sorting
+                if (!string.IsNullOrWhiteSpace(sortBy))
+                {
+                    query = sortDescending
+                        ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                        : query.OrderBy(x => EF.Property<object>(x, sortBy));
+                }
+
+                // Get total count
+                var totalItems = await query.CountAsync(cancellationToken);
+
+                // Apply pagination
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                var dtos = _mapper.Map<List<{EntityName}Dto>>(items);
+
+                var result = new PagedResult<{EntityName}Dto>
+                {
+                    Items = dtos,
+                    TotalItems = totalItems,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+                };
+
+{CacheSet}
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving {EntityName} list", nameof({EntityName}));
+                throw;
+            }
+        }
+
+        public async Task<Guid> CreateAsync({EntityName}Dto dto, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var entity = _mapper.Map<{EntityName}>(dto);
+                await _repository.AddAsync(entity, cancellationToken);
+                await _repository.SaveChangesAsync(cancellationToken);
+
+{CacheInvalidation}
+                _logger.LogInformation("{EntityName} created with ID {Id}", nameof({EntityName}), entity.Id);
+                return entity.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating {EntityName}", nameof({EntityName}));
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateAsync(Guid id, {EntityName}Dto dto, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var entity = await _repository.GetByIdAsync(id, cancellationToken);
+                if (entity == null)
+                {
+                    _logger.LogWarning("{EntityName} with ID {Id} not found for update", nameof({EntityName}), id);
+                    throw new NotFoundException($"{EntityName} with ID {id} not found.");
+                }
+
+                _mapper.Map(dto, entity);
+                await _repository.UpdateAsync(entity, cancellationToken);
+                await _repository.SaveChangesAsync(cancellationToken);
+
+{CacheInvalidation}
+                _logger.LogInformation("{EntityName} with ID {Id} updated", nameof({EntityName}), id);
+                return true;
+            }
+            catch (Exception ex) when (ex is not NotFoundException)
+            {
+                _logger.LogError(ex, "Error updating {EntityName} with ID {Id}", nameof({EntityName}), id);
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var entity = await _repository.GetByIdAsync(id, cancellationToken);
+                if (entity == null)
+                {
+                    _logger.LogWarning("{EntityName} with ID {Id} not found for deletion", nameof({EntityName}), id);
+                    throw new NotFoundException($"{EntityName} with ID {id} not found.");
+                }
+
+                await _repository.DeleteAsync(entity, cancellationToken);
+                await _repository.SaveChangesAsync(cancellationToken);
+
+{CacheInvalidation}
+                _logger.LogInformation("{EntityName} with ID {Id} deleted", nameof({EntityName}), id);
+                return true;
+            }
+            catch (Exception ex) when (ex is not NotFoundException)
+            {
+                _logger.LogError(ex, "Error deleting {EntityName} with ID {Id}", nameof({EntityName}), id);
+                throw;
+            }
+        }
+{AdditionalMethods}
+    }
+} 

@@ -1,0 +1,194 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
+using {Namespace}.Interfaces;
+using {Namespace}.Models;
+using {Namespace}.Services;
+
+namespace {Namespace}.Tests
+{
+    public class {EntityName}ServiceTests
+    {
+        private readonly Mock<I{EntityName}Repository> _repositoryMock;
+        private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<{EntityName}Service>> _loggerMock;
+{CacheServiceMock}
+        private readonly {EntityName}Service _service;
+
+        public {EntityName}ServiceTests()
+        {
+            _repositoryMock = new Mock<I{EntityName}Repository>();
+            _mapperMock = new Mock<IMapper>();
+            _loggerMock = new Mock<ILogger<{EntityName}Service>>();
+{CacheServiceMockSetup}
+
+            _service = new {EntityName}Service(
+                _repositoryMock.Object,
+                _mapperMock.Object,
+                _loggerMock.Object{CacheServiceParam});
+        }
+
+        [Fact]
+        public async Task GetByIdAsync_ExistingId_ReturnsDto()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var entity = new {EntityName}
+            {
+                Id = id,
+{EntityProperties}
+            };
+
+            var dto = new {EntityName}Dto
+            {
+                Id = id,
+{DtoProperties}
+            };
+
+            _repositoryMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(entity);
+
+            _mapperMock.Setup(m => m.Map<{EntityName}Dto>(entity))
+                .Returns(dto);
+
+            // Act
+            var result = await _service.GetByIdAsync(id);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Id.Should().Be(id);
+{DtoAssertions}
+        }
+
+        [Fact]
+        public async Task GetByIdAsync_NonExistingId_ThrowsNotFoundException()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            _repositoryMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync((({EntityName})null));
+
+            // Act & Assert
+            await _service.Invoking(s => s.GetByIdAsync(id))
+                .Should().ThrowAsync<NotFoundException>()
+                .WithMessage($"{EntityName} with ID {id} not found.");
+        }
+
+        [Fact]
+        public async Task GetAllAsync_ReturnsPagedResult()
+        {
+            // Arrange
+            var entities = new List<{EntityName}>
+            {
+                new() { Id = Guid.NewGuid(), {EntityPropertiesInitialization} },
+                new() { Id = Guid.NewGuid(), {EntityPropertiesInitialization} }
+            };
+
+            var dtos = entities.Select(e => new {EntityName}Dto
+            {
+                Id = e.Id,
+{DtoPropertiesMapping}
+            }).ToList();
+
+            var queryable = entities.AsQueryable();
+            _repositoryMock.Setup(r => r.GetQueryable())
+                .Returns(queryable);
+
+            _mapperMock.Setup(m => m.Map<List<{EntityName}Dto>>(It.IsAny<List<{EntityName}>>()))
+                .Returns(dtos);
+
+            // Act
+            var result = await _service.GetAllAsync();
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Items.Should().HaveCount(2);
+            result.TotalItems.Should().Be(2);
+            result.PageNumber.Should().Be(1);
+            result.PageSize.Should().Be(10);
+        }
+
+        [Fact]
+        public async Task CreateAsync_ValidDto_ReturnsId()
+        {
+            // Arrange
+            var dto = new {EntityName}Dto
+            {
+{DtoProperties}
+            };
+
+            var entity = new {EntityName}
+            {
+                Id = Guid.NewGuid(),
+{EntityProperties}
+            };
+
+            _mapperMock.Setup(m => m.Map<{EntityName}>(dto))
+                .Returns(entity);
+
+            // Act
+            var result = await _service.CreateAsync(dto);
+
+            // Assert
+            result.Should().Be(entity.Id);
+            _repositoryMock.Verify(r => r.AddAsync(entity, It.IsAny<CancellationToken>()), Times.Once);
+            _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ExistingEntity_ReturnsTrue()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var dto = new {EntityName}Dto
+            {
+                Id = id,
+{DtoProperties}
+            };
+
+            var existingEntity = new {EntityName}
+            {
+                Id = id,
+{EntityProperties}
+            };
+
+            _repositoryMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingEntity);
+
+            // Act
+            var result = await _service.UpdateAsync(id, dto);
+
+            // Assert
+            result.Should().BeTrue();
+            _repositoryMock.Verify(r => r.UpdateAsync(existingEntity, It.IsAny<CancellationToken>()), Times.Once);
+            _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ExistingEntity_ReturnsTrue()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var existingEntity = new {EntityName} { Id = id };
+
+            _repositoryMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(existingEntity);
+
+            // Act
+            var result = await _service.DeleteAsync(id);
+
+            // Assert
+            result.Should().BeTrue();
+            _repositoryMock.Verify(r => r.DeleteAsync(existingEntity, It.IsAny<CancellationToken>()), Times.Once);
+            _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        }
+{AdditionalTests}
+    }
+} 

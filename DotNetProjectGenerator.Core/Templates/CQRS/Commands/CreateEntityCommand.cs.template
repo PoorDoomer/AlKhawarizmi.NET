@@ -1,0 +1,50 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentValidation;
+using MediatR;
+
+namespace {Namespace}.Commands
+{
+    public class Create{EntityName}Command : IRequest<Guid>
+    {
+{Properties}
+    }
+
+    public class Create{EntityName}CommandValidator : AbstractValidator<Create{EntityName}Command>
+    {
+        public Create{EntityName}CommandValidator()
+        {
+{Validations}
+        }
+    }
+
+    public class Create{EntityName}CommandHandler : IRequestHandler<Create{EntityName}Command, Guid>
+    {
+        private readonly IRepository<{EntityName}> _repository;
+        private readonly IValidator<Create{EntityName}Command> _validator;
+
+        public Create{EntityName}CommandHandler(
+            IRepository<{EntityName}> repository,
+            IValidator<Create{EntityName}Command> validator)
+        {
+            _repository = repository;
+            _validator = validator;
+        }
+
+        public async Task<Guid> Handle(Create{EntityName}Command request, CancellationToken cancellationToken)
+        {
+            await _validator.ValidateAndThrowAsync(request, cancellationToken);
+
+            var entity = new {EntityName}
+            {
+{Mappings}
+            };
+
+            await _repository.AddAsync(entity, cancellationToken);
+            await _repository.SaveChangesAsync(cancellationToken);
+
+            return entity.Id;
+        }
+    }
+} 

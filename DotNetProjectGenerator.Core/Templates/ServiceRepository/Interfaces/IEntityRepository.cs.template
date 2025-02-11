@@ -1,0 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using {Namespace}.Models;
+
+namespace {Namespace}.Interfaces
+{
+    public interface I{EntityName}Repository
+    {
+        Task<{EntityName}> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        IQueryable<{EntityName}> GetQueryable();
+        Task<List<{EntityName}>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<{EntityName}> AddAsync({EntityName} entity, CancellationToken cancellationToken = default);
+        Task UpdateAsync({EntityName} entity, CancellationToken cancellationToken = default);
+        Task DeleteAsync({EntityName} entity, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+{AdditionalMethods}
+    }
+} 
