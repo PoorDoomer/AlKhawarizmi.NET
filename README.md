@@ -1,4 +1,7 @@
 # AlKhawarizmi.NET
+![AlKhawarizmi.NET](khwa.net.png)
+
+
 
 ```
     _    _ _  ___                              _              _ _   _ _____ _____ 
@@ -7,7 +10,8 @@
  / ___ \| | . \| | | | (_| |\ V  V / (_| | |  | |/ / (_| \__ \ | |\  | |___  | |  
 /_/   \_\_|_|\_\_| |_|\__,_| \_/\_/ \__,_|_|  |_/___\__,_|___/_|_| \_|_____| |_|  
 ```
-![AlKhawarizmi.NET](khwa.net.png)
+
+
 A powerful CLI tool for generating clean architecture .NET projects with best practices baked in. AlKhawarizmi.NET helps you bootstrap production-ready .NET applications with various architectural patterns and cross-cutting concerns configured out of the box.
 
 ## 🌟 Features
